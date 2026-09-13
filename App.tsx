@@ -17,6 +17,14 @@ export type SessionConfig = {
   duration: number;
 };
 
+export type SessionResult = {
+  intent: string;
+  goal: string;
+  durationMin: number;
+  elapsedSec: number;
+  notes: string;
+};
+
 export default function App() {
   const [screen, setScreen] = useState<ScreenName>('login');
   const [prevScreen, setPrevScreen] = useState<ScreenName>('focus');
@@ -25,6 +33,7 @@ export default function App() {
     goal: 'Biologia celular: Mitose vs Meiose',
     duration: 40,
   });
+  const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
 
   const goToProfile = () => { setPrevScreen(screen); setScreen('home'); };
   const goBack = () => setScreen(prevScreen);
@@ -36,9 +45,9 @@ export default function App() {
         {screen === 'login' && <LoginScreen onStart={() => setScreen('focus')} />}
         {screen === 'home' && <HomeScreen onBack={goBack} onNavigate={setScreen} />}
         {screen === 'focus' && <FocusScreen onStart={(cfg) => { setConfig(cfg); setScreen('learn'); }} onProfile={goToProfile} />}
-        {screen === 'learn' && <SessionScreen config={config} onBack={() => setScreen('focus')} onProfile={goToProfile} />}
+        {screen === 'learn' && <SessionScreen config={config} onBack={() => setScreen('focus')} onProfile={goToProfile} onEnd={(result) => { setSessionResult(result); setScreen('reflect'); }} />}
         {screen === 'create' && <CreateScreen onProfile={goToProfile} />}
-        {screen === 'reflect' && <ReflectionScreen onProfile={goToProfile} />}
+        {screen === 'reflect' && <ReflectionScreen sessionResult={sessionResult} onDone={() => setScreen('stats')} onProfile={goToProfile} />}
         {screen === 'stats' && <StatsScreen onBack={() => setScreen('home')} onProfile={goToProfile} />}
       </View>
       {screen !== 'login' && screen !== 'home' && <BottomNav active={screen} onChange={setScreen} />}

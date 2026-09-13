@@ -173,7 +173,7 @@ export function StatsScreen({ onBack, onProfile }: { onBack: () => void; onProfi
 
   return (
     <View style={styles.page}>
-      <BrandHeader title="Dashboard" back onBack={onBack} onProfile={onProfile} />
+      <BrandHeader title="Estatísticas" back onBack={onBack} onProfile={onProfile} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header KPIs */}
@@ -181,7 +181,7 @@ export function StatsScreen({ onBack, onProfile }: { onBack: () => void; onProfi
           <View style={styles.kpi}>
             <Feather name="zap" size={18} color={colors.amber} />
             <Text style={styles.kpiValue}>7</Text>
-            <Text style={styles.kpiLabel}>Streak{'\n'}dias</Text>
+            <Text style={styles.kpiLabel}>Risca{'\n'}dias</Text>
           </View>
           <View style={[styles.kpi, { backgroundColor: colors.primaryContainer }]}>
             <Feather name="clock" size={18} color={colors.white} />
@@ -190,7 +190,7 @@ export function StatsScreen({ onBack, onProfile }: { onBack: () => void; onProfi
           </View>
           <View style={styles.kpi}>
             <Feather name="edit-3" size={18} color={colors.primaryContainer} />
-            <Text style={styles.kpiValue}>120</Text>
+            <Text style={styles.kpiValue}>10</Text>
             <Text style={styles.kpiLabel}>Palavras{'\n'}/ foco</Text>
           </View>
           <View style={styles.kpi}>
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
 
   kpiRow: { flexDirection: 'row', gap: spacing.sm },
   kpi: { flex: 1, backgroundColor: colors.white, borderRadius: radius.soft, padding: spacing.md, alignItems: 'center', gap: 4, shadowColor: colors.primary, shadowOpacity: 0.04, shadowRadius: 8, elevation: 1 },
-  kpiValue: { fontSize: 20, fontWeight: '800', color: colors.primary },
+  kpiValue: { fontSize: 16, fontWeight: '800', color: colors.primary },
   kpiLabel: { fontSize: 10, color: colors.muted, fontWeight: '600', textAlign: 'center', lineHeight: 14 },
 
   tabRow: { flexDirection: 'row', backgroundColor: colors.mint, borderRadius: radius.pill, padding: 4, gap: 4 },

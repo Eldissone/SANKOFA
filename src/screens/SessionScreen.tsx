@@ -4,9 +4,14 @@ import { Feather } from '@expo/vector-icons';
 import { BrandHeader } from '../components/AppChrome';
 import { Eyebrow, Pill, PrimaryButton, SectionCard, text } from '../components/UI';
 import { colors, radius, spacing } from '../theme';
-import type { SessionConfig } from '../../App';
+import type { SessionConfig, SessionResult } from '../../App';
 
-export function SessionScreen({ config, onBack, onProfile }: { config: SessionConfig, onBack: () => void; onProfile?: () => void }) {
+export function SessionScreen({ config, onBack, onProfile, onEnd }: {
+  config: SessionConfig;
+  onBack: () => void;
+  onProfile?: () => void;
+  onEnd?: (result: SessionResult) => void;
+}) {
   const [seconds, setSeconds] = useState(config.duration * 60);
   const [isActive, setIsActive] = useState(true);
   const [prompt, setPrompt] = useState(true); // default true para demonstração do MVP
@@ -22,8 +27,23 @@ export function SessionScreen({ config, onBack, onProfile }: { config: SessionCo
       if (timer) clearInterval(timer);
     };
   }, [isActive, seconds]);
-  const clock = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+  const elapsed = config.duration * 60 - seconds;
 
+  const handleEnd = () => {
+    if (onEnd) {
+      onEnd({
+        intent: config.intent,
+        goal: config.goal,
+        durationMin: config.duration,
+        elapsedSec: elapsed,
+        notes: note,
+      });
+    } else {
+      onBack();
+    }
+  };
+
+  const clock = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 
   const decide = (message: string) => { setPrompt(false); setToast(message); setTimeout(() => setToast(''), 2600); };
 
@@ -66,7 +86,7 @@ export function SessionScreen({ config, onBack, onProfile }: { config: SessionCo
             {isActive ? "Pausar Sessão" : "Continuar Foco"}
           </PrimaryButton>
           <PrimaryButton
-            onPress={onBack}
+            onPress={handleEnd}
             tone="soft"
             icon="square"
             style={{ paddingHorizontal: 20 }}
@@ -176,19 +196,19 @@ const styles = StyleSheet.create({
   legendRow: { flexDirection: 'row', gap: 12 },
   legend: { color: colors.primary, fontSize: 12, fontWeight: '700', flexDirection: 'row', alignItems: 'center', gap: 4 },
   reinforce: { color: colors.amberStrong },
-  prompt: { padding: spacing.lg, gap: spacing.md, borderRadius: radius.card, backgroundColor: colors.amberSoft, shadowColor: colors.amberStrong, shadowOpacity: 0.1, shadowRadius: 15, elevation: 3 },
+  prompt: { padding: spacing.lg, gap: spacing.md, borderRadius: radius.card, backgroundColor: colors.mint, shadowColor: colors.primary, shadowOpacity: 0.1, shadowRadius: 15, elevation: 3 },
   promptTop: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   amberCircle: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.white },
-  promptTitle: { marginTop: 4, color: colors.amberStrong },
+  promptTitle: { marginTop: 4, color: colors.primary },
   promptBody: { color: colors.ink, marginBottom: 4 },
-  autonomy: { textAlign: 'center', color: colors.amberStrong, fontSize: 12, fontWeight: '700', marginTop: 4 },
+  autonomy: { textAlign: 'center', color: colors.primaryContainer, fontSize: 12, fontWeight: '700', marginTop: 4 },
   resumed: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: spacing.md, backgroundColor: colors.mint, borderRadius: radius.soft },
   resumedText: { color: colors.success, fontWeight: '700', fontSize: 13, flex: 1 },
   change: { color: colors.primaryContainer, fontWeight: '800', fontSize: 13 },
   tutorHeading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   tutorIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' },
-  provocation: { backgroundColor: colors.amberSoft, padding: spacing.md, borderRadius: radius.soft, gap: 8, marginTop: spacing.md },
-  quote: { color: colors.amberStrong, fontSize: 16, lineHeight: 24, fontStyle: 'italic', fontWeight: '500' },
+  provocation: { backgroundColor: colors.mint, padding: spacing.md, borderRadius: radius.soft, gap: 8, marginTop: spacing.md },
+  quote: { color: colors.primary, fontSize: 16, lineHeight: 24, fontStyle: 'italic', fontWeight: '500' },
   diagramRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   diagram: { height: 120, flex: 1, backgroundColor: colors.mint, borderRadius: radius.soft, justifyContent: 'center', alignItems: 'center', gap: 12, overflow: 'hidden' },
   diagramLabel: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 8, backgroundColor: 'rgba(233, 245, 240, 0.9)', color: colors.primary, fontSize: 11, fontWeight: '700', textAlign: 'center' },

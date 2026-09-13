@@ -56,7 +56,7 @@ export function CreateScreen({ onProfile }: { onProfile?: () => void }) {
 
         <SectionCard>
           <View style={styles.summaryTop}>
-            <Text style={text.h3}><Feather name="edit" size={18} color={colors.primary} /> Meu Resumo Autoral</Text>
+            <Text style={text.h3}><Feather name="edit" size={18} color={colors.primary} /> Meu Resumo</Text>
             <Pill tone="mint">{count} palavras</Pill>
           </View>
           <TextInput value={summary} onChangeText={setSummary} multiline textAlignVertical="top" placeholder="Explique como acontece o crossing-over e por que ele gera variabilidade genética..." placeholderTextColor={colors.muted} style={styles.editor} />
