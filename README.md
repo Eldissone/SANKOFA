@@ -1,6 +1,7 @@
 # Sankofa — Modo Aprendizagem
 
-Protótipo convertido de HTML para React Native com Expo. O fluxo demonstrável cobre:
+# Tema do Hackathon:
+Como construir uma relação mais consciente entre tecnologia e educação em um mundo cada vez mais conectado e cheio de distrações?
 
 - **Foco:** intenção, duração e distrações escolhidas voluntariamente;
 - **Aprender:** sessão cronometrada, intervenção não invasiva e tutor socrático;
@@ -12,6 +13,7 @@ Protótipo convertido de HTML para React Native com Expo. O fluxo demonstrável 
 ```powershell
 npm.cmd install
 npm.cmd start
+npx expo start
 ```
 
 Em seguida, abra no Expo Go ou escolha um emulador Android/iOS. Os ícones foram mantidos sem dependências externas; podem ser trocados por `@expo/vector-icons` quando o sistema visual definitivo estiver disponível.
