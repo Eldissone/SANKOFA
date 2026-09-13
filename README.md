@@ -17,3 +17,7 @@ npx expo start
 ```
 
 Em seguida, abra no Expo Go ou escolha um emulador Android/iOS. Os ícones foram mantidos sem dependências externas; podem ser trocados por `@expo/vector-icons` quando o sistema visual definitivo estiver disponível.
+
+Colaboradores:
+* Laurindo Dumba
+* Eldissone Vilonga
