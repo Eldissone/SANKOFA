@@ -16,7 +16,12 @@ export function SessionScreen({ config, onBack, onProfile, onEnd }: {
   const [isActive, setIsActive] = useState(true);
   const [prompt, setPrompt] = useState(true); // default true para demonstração do MVP
   const [toast, setToast] = useState('');
-  const [note, setNote] = useState('A clivagem da coesina permite a migração simultânea para os pólos opostos através da tração dos microtúbulos cinetocóricos.');
+  const [note, setNote] = useState('');
+  const [steps, setSteps] = useState(config.microSteps || []);
+  
+  const toggleStep = (id: string) => {
+    setSteps(old => old.map(s => s.id === id ? { ...s, done: !s.done } : s));
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -57,6 +62,22 @@ export function SessionScreen({ config, onBack, onProfile, onEnd }: {
         </View>
         <Text style={text.h2}>{config.goal}</Text>
         <Text style={text.small}>Módulo em andamento</Text>
+        
+        {steps.length > 0 && (
+          <View style={styles.actionPlan}>
+            <Eyebrow color={colors.primaryContainer} icon="list">Plano de Ação</Eyebrow>
+            <View style={{ gap: 8, marginTop: 12 }}>
+              {steps.map(step => (
+                <Pressable key={step.id} style={styles.stepItem} onPress={() => toggleStep(step.id)}>
+                  <View style={[styles.checkbox, step.done && styles.checkboxDone]}>
+                    {step.done && <Feather name="check" size={14} color={colors.white} />}
+                  </View>
+                  <Text style={[styles.stepText, step.done && styles.stepTextDone]}>{step.text}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
 
         <SectionCard style={styles.timerCard}>
           <View style={styles.timerCircle}>
@@ -127,17 +148,19 @@ export function SessionScreen({ config, onBack, onProfile, onEnd }: {
             <View style={styles.tutorIcon}><Feather name="message-square" size={20} color={colors.white} /></View>
             <View style={{ flex: 1 }}>
               <Text style={text.h3}>Tutor Socrático</Text>
-              <Text style={text.small}>Copiloto Dialético Ativo</Text>
+              <Text style={text.small}>{config.aiMode === 'silent' ? 'Copiloto em modo silencioso' : 'Copiloto Dialético Ativo'}</Text>
             </View>
-            <Pill icon="zap">Reflexão Ativa</Pill>
+            <Pill icon={config.aiMode === 'silent' ? "moon" : "zap"}>{config.aiMode === 'silent' ? 'Apenas Observador' : 'Reflexão Ativa'}</Pill>
           </View>
 
-          <View style={styles.provocation}>
-            <Eyebrow color={colors.amberStrong} icon="help-circle">Provocação de Síntese</Eyebrow>
-            <Text style={styles.quote}>“Não dou respostas prontas, te ajudo a conectar as ideias. O que você acabou de compreender sobre a transição dos cinetócoros durante a Anáfase?”</Text>
-          </View>
+          {config.aiMode !== 'silent' && (
+            <View style={styles.provocation}>
+              <Eyebrow color={colors.amberStrong} icon="help-circle">Provocação de Síntese</Eyebrow>
+              <Text style={styles.quote}>“Não dou respostas prontas, te ajudo a conectar as ideias. O que você acabou de compreender sobre a transição dos cinetócoros durante a Anáfase?”</Text>
+            </View>
+          )}
 
-          <Text style={[text.h3, styles.searchTitle]}>Pesquisa Guiada na Base</Text>
+          <Text style={[text.h3, styles.searchTitle, config.aiMode === 'silent' && { marginTop: spacing.md }]}>Pesquisa Guiada na Base</Text>
           <View style={styles.search}>
             <Feather name="search" size={18} color={colors.muted} />
             <TextInput placeholder="Ex.: Encurtamento de microtúbulos..." placeholderTextColor={colors.muted} style={styles.searchInput} />
@@ -222,4 +245,10 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
   toast: { position: 'absolute', left: spacing.lg, right: spacing.lg, bottom: 24, backgroundColor: colors.primary, padding: spacing.md, borderRadius: radius.soft, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, shadowColor: colors.primary, shadowOpacity: 0.2, shadowRadius: 10, elevation: 5 },
   toastText: { color: colors.white, fontSize: 14, fontWeight: '700' },
+  actionPlan: { backgroundColor: colors.mint, padding: spacing.md, borderRadius: radius.card, marginTop: spacing.xs },
+  stepItem: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.white, padding: spacing.md, borderRadius: radius.soft },
+  checkbox: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
+  checkboxDone: { backgroundColor: colors.success, borderColor: colors.success },
+  stepText: { fontSize: 15, color: colors.primary, fontWeight: '600', flex: 1 },
+  stepTextDone: { color: colors.muted, textDecorationLine: 'line-through' },
 });

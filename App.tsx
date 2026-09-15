@@ -15,6 +15,9 @@ export type SessionConfig = {
   intent: string;
   goal: string;
   duration: number;
+  microSteps?: { id: string; text: string; done: boolean }[];
+  aiMode?: 'active' | 'silent';
+  allowedApps?: string[];
 };
 
 export type SessionResult = {
@@ -32,6 +35,7 @@ export default function App() {
     intent: 'Estudar',
     goal: 'Biologia celular: Mitose vs Meiose',
     duration: 40,
+    aiMode: 'active',
   });
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
 

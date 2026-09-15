@@ -23,7 +23,7 @@ const installedApps: Array<{ id: string; name: string; icon: keyof typeof Feathe
   { id: 'instagram', name: 'Instagram', icon: 'instagram' },
 ];
 
-export function FocusScreen({ onStart, onProfile }: { onStart: (config: { intent: string, goal: string, duration: number, allowedApps?: string[] }) => void; onProfile?: () => void }) {
+export function FocusScreen({ onStart, onProfile }: { onStart: (config: { intent: string, goal: string, duration: number, allowedApps?: string[], microSteps?: { id: string; text: string; done: boolean }[], aiMode?: 'active' | 'silent' }) => void; onProfile?: () => void }) {
   const [intent, setIntent] = useState('Estudar');
   const [goal, setGoal] = useState('');
   const [duration, setDuration] = useState(40);
@@ -31,9 +31,20 @@ export function FocusScreen({ onStart, onProfile }: { onStart: (config: { intent
   const [shield, setShield] = useState(true);
   const [step, setStep] = useState(1);
   const [allowedApps, setAllowedApps] = useState<string[]>(['notion', 'anki', 'calculadora']);
+  const [microSteps, setMicroSteps] = useState<{ id: string; text: string; done: boolean }[]>([]);
+  const [newStep, setNewStep] = useState('');
+  const [aiMode, setAiMode] = useState<'active' | 'silent'>('active');
   const [intentExpanded, setIntentExpanded] = useState(false); // unused, kept for safety
   const toggle = (value: string) => setSelected((old) => old.includes(value) ? old.filter((item) => item !== value) : [...old, value]);
   const toggleAllowedApp = (id: string) => setAllowedApps((old) => old.includes(id) ? old.filter(i => i !== id) : [...old, id]);
+
+  const generateMicroSteps = () => {
+    setMicroSteps([
+      { id: '1', text: 'Revisar conceitos principais', done: false },
+      { id: '2', text: 'Praticar com exemplos', done: false },
+      { id: '3', text: 'Fazer síntese final', done: false }
+    ]);
+  };
 
   return (
     <View style={styles.page}>
@@ -88,16 +99,63 @@ export function FocusScreen({ onStart, onProfile }: { onStart: (config: { intent
 
             <SectionCard style={{ marginTop: spacing.md, marginBottom: spacing.md }}>
               <View style={styles.cardTop}>
-                <Eyebrow icon="flag" color={colors.amberStrong}>Objetivo principal</Eyebrow>
+                <Eyebrow icon="flag" color={colors.amberStrong}>Meta de conclusão</Eyebrow>
               </View>
               <TextInput
                 style={styles.goalInput}
-                placeholder="O que você quer alcançar nesta sessão?"
+                placeholder="O que decreta o fim dessa sessão?"
                 placeholderTextColor={colors.muted}
                 value={goal}
                 onChangeText={setGoal}
               />
-              <Text style={text.body}>Escreva claramente para onde vai sua atenção antes de entrar no fluxo.</Text>
+              <Text style={text.body}>Escreva claramente onde você quer chegar antes de entrar no fluxo.</Text>
+              
+              {microSteps.length > 0 && (
+                <View style={styles.microStepsList}>
+                  {microSteps.map(step => (
+                    <View key={step.id} style={styles.microStepItem}>
+                      <Feather name="square" size={16} color={colors.muted} />
+                      <Text style={styles.microStepText}>{step.text}</Text>
+                      <Pressable onPress={() => setMicroSteps(old => old.filter(s => s.id !== step.id))}>
+                        <Feather name="x" size={14} color={colors.muted} />
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              <View style={styles.addStepRow}>
+                <TextInput
+                  style={styles.addStepInput}
+                  placeholder="Adicionar passo manual..."
+                  placeholderTextColor={colors.muted}
+                  value={newStep}
+                  onChangeText={setNewStep}
+                  onSubmitEditing={() => {
+                    if (newStep.trim()) {
+                      setMicroSteps(old => [...old, { id: Date.now().toString(), text: newStep.trim(), done: false }]);
+                      setNewStep('');
+                    }
+                  }}
+                />
+                <Pressable 
+                  style={styles.addStepButton} 
+                  onPress={() => {
+                    if (newStep.trim()) {
+                      setMicroSteps(old => [...old, { id: Date.now().toString(), text: newStep.trim(), done: false }]);
+                      setNewStep('');
+                    }
+                  }}
+                >
+                  <Feather name="plus" size={18} color={colors.white} />
+                </Pressable>
+              </View>
+
+              {microSteps.length === 0 && (
+                <Pressable onPress={generateMicroSteps} style={styles.aiButton}>
+                  <Text style={styles.aiButtonText}>✨ Gerar micro-passos com IA</Text>
+                </Pressable>
+              )}
             </SectionCard>
 
             <SectionCard>
@@ -183,6 +241,18 @@ export function FocusScreen({ onStart, onProfile }: { onStart: (config: { intent
                       </View>
                     </View>
                   )}
+
+                  <View style={[styles.shield, { marginTop: spacing.lg, backgroundColor: colors.surfaceSoft }]}>
+                    <View style={[styles.shieldIcon, { backgroundColor: colors.white }]}>
+                      <Feather name="cpu" size={18} color={colors.amberStrong} />
+                    </View>
+                    <View style={styles.shieldCopy}>
+                      <Text style={text.h3}>Tutor Socrático</Text>
+                      <Text style={text.small}>Intervenção da IA durante a sessão</Text>
+                    </View>
+                    <Switch value={aiMode === 'active'} onValueChange={(val) => setAiMode(val ? 'active' : 'silent')} trackColor={{ false: colors.line, true: colors.amberStrong }} thumbColor={colors.white} />
+                  </View>
+
                 </View>
               )}
             </SectionCard>
@@ -214,7 +284,7 @@ export function FocusScreen({ onStart, onProfile }: { onStart: (config: { intent
 
             <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg }}>
               <PrimaryButton onPress={() => setStep(2)} tone="soft" icon="arrow-left" style={{ paddingHorizontal: 20 }}>Voltar</PrimaryButton>
-              <PrimaryButton onPress={() => onStart({ intent, goal: goal || 'Foco Contínuo', duration, allowedApps })} icon="play-circle" style={{ flex: 1 }}>
+              <PrimaryButton onPress={() => onStart({ intent, goal: goal || 'Foco Contínuo', duration, allowedApps, microSteps, aiMode })} icon="play-circle" style={{ flex: 1 }}>
                 Iniciar Sessão
               </PrimaryButton>
             </View>
@@ -278,4 +348,12 @@ const styles = StyleSheet.create({
   roomIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' },
   roomTitle: { color: colors.primary, fontSize: 15, fontWeight: '800' },
   roomSubtitle: { color: colors.muted, fontSize: 13, fontWeight: '600' },
+  aiButton: { marginTop: spacing.md, alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.amberSoft, borderRadius: radius.pill },
+  aiButtonText: { color: colors.amberStrong, fontSize: 13, fontWeight: '800' },
+  microStepsList: { marginTop: spacing.md, gap: 8, padding: spacing.sm, backgroundColor: colors.surfaceSoft, borderRadius: radius.soft },
+  microStepItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  microStepText: { color: colors.ink, fontSize: 14, fontWeight: '600', flex: 1 },
+  addStepRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.md },
+  addStepInput: { flex: 1, backgroundColor: colors.surfaceSoft, borderRadius: radius.soft, paddingHorizontal: 12, height: 40, color: colors.primary, fontSize: 14 },
+  addStepButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryContainer, alignItems: 'center', justifyContent: 'center' },
 });
