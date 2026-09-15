@@ -14,7 +14,7 @@ export function SessionScreen({ config, onBack, onProfile, onEnd }: {
 }) {
   const [seconds, setSeconds] = useState(config.duration * 60);
   const [isActive, setIsActive] = useState(true);
-  const [prompt, setPrompt] = useState(true); // default true para demonstração do MVP
+  const [prompt, setPrompt] = useState(false);
   const [toast, setToast] = useState('');
   const [note, setNote] = useState('');
   const [steps, setSteps] = useState(config.microSteps || []);
@@ -100,7 +100,12 @@ export function SessionScreen({ config, onBack, onProfile, onEnd }: {
 
         <View style={styles.controlsRow}>
           <PrimaryButton
-            onPress={() => setIsActive(!isActive)}
+            onPress={() => {
+              const nextState = !isActive;
+              setIsActive(nextState);
+              if (!nextState) setPrompt(true);
+              else setPrompt(false);
+            }}
             icon={isActive ? "pause" : "play"}
             style={{ flex: 1 }}
           >
@@ -125,18 +130,18 @@ export function SessionScreen({ config, onBack, onProfile, onEnd }: {
                 <Text style={[text.h2, styles.promptTitle]}>Parece que você está perdendo o foco.</Text>
               </View>
             </View>
-            <Text style={[text.body, styles.promptBody]}>Notamos um intervalo no ritmo de anotações. Sem pressa e sem cobrança: você prefere renovar o impulso ou dar espaço para a mente respirar?</Text>
-            <PrimaryButton icon="play" onPress={() => decide('Foco estendido por mais 15 minutos.')}>Continuar foco (+15 min)</PrimaryButton>
+            <Text style={[text.body, styles.promptBody]}>Notamos uma pausa. Sem pressa e sem cobrança: você prefere renovar o impulso ou dar espaço para a mente respirar?</Text>
+            <PrimaryButton icon="play" onPress={() => { decide('Foco estendido por mais 15 minutos.'); setIsActive(true); }}>Continuar foco (+15 min)</PrimaryButton>
             <PrimaryButton icon="coffee" tone="amber" onPress={() => decide('Pausa consciente iniciada.')}>Fazer pausa consciente (5 min)</PrimaryButton>
             <PrimaryButton icon="shuffle" tone="soft" onPress={() => decide('Você pode escolher uma nova atividade.')}>Mudar de atividade</PrimaryButton>
             <Text style={styles.autonomy}>Autonomia guiada, zero vigilância invasiva.</Text>
           </View>
         )}
 
-        {!prompt && (
+        {!isActive && !prompt && (
           <View style={styles.resumed}>
             <Feather name="check-circle" size={16} color={colors.success} />
-            <Text style={styles.resumedText}>Sua escolha foi respeitada. Continue no seu ritmo.</Text>
+            <Text style={styles.resumedText}>Sua escolha foi respeitada. O tempo está pausado.</Text>
             <Pressable onPress={() => setPrompt(true)}>
               <Text style={styles.change}>Rever opções</Text>
             </Pressable>
